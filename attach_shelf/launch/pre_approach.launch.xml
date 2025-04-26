@@ -1,14 +1,17 @@
-<!-- get parameter from launch command, joinst stage for wheel, spin onceros2 launch attach_shelf pre_approach.launch.xml obstacle:=0.3 degrees:=-90 -->
-
 <launch>
 
     <arg name="obstacle" default="0.8"/>
     <arg name="degrees" default="0.5"/>
+    <arg name="rviz_config_file_name" default="launch_part.rviz"/>
 
     <node pkg="attach_shelf" exec="pre_approach_node" name="pre_approach">
         <param name="obstacle" value="$(var obstacle)"/>
         <param name="degrees" value="$(var degrees)"/>
     </node>
+
+    <include file="$(find-pkg-share attach_shelf)/launch/start_rviz_with_arguments.launch.py">
+        <arg name="rviz_config_file_name" value="$(var rviz_config_file_name)"/>
+    </include>
 
 </launch>
 

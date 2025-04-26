@@ -6,9 +6,12 @@
 
 class PreApproach : public rclcpp::Node {
 public:
-  PreApproach(int &argc, char **argv) : Node("pre_approach") {
+  PreApproach() : Node("pre_approach") {
     
-    argument_parsing(argv);
+    this->declare_parameter("obstacle", 0.0);
+    this->declare_parameter("degrees", 0.0);
+
+    getting_params();
     // === Publishers and Subscribers ===
     cmd_pub_ =
         // this->create_publisher<geometry_msgs::msg::Twist>("/cmd_vel", 10);
@@ -82,7 +85,16 @@ private:
     //             max_direction_);
   }
 
-  void checkvicinity(geometry_msgs::msg::Twist &cmd) {
+
+  void getting_params() {
+    obstacle =
+        this->get_parameter("obstacle").get_parameter_value().get<float>();
+    degrees =
+        this->get_parameter("degrees").get_parameter_value().get<float>();
+  }
+
+
+    void checkvicinity(geometry_msgs::msg::Twist &cmd) {
         if (min_value_ < degrees && min_direction_ < 0) {
             cmd.linear.x = 0.1;
             cmd.angular.z = 0.75;
@@ -93,12 +105,6 @@ private:
             RCLCPP_INFO(this->get_logger(), "There is something on left");
         }
 
-    }
-
-
-  void argument_parsing(char **argv) {
-    obstacle = std::stof(argv[2]);
-    degrees = std::stof(argv[4]);
     }
 
   void timerCallback() {
@@ -127,7 +133,7 @@ private:
 
 int main(int argc, char *argv[]) {
   rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<PreApproach>(argc, argv));
+  rclcpp::spin(std::make_shared<PreApproach>());
   rclcpp::shutdown();
   return 0;
 }
