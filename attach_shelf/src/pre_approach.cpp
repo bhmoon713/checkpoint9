@@ -6,7 +6,9 @@
 
 class PreApproach : public rclcpp::Node {
 public:
-  PreApproach() : Node("pre_approach") {
+  PreApproach(int &argc, char **argv) : Node("pre_approach") {
+    
+    argument_parsing(argv);
     // === Publishers and Subscribers ===
     cmd_pub_ =
         // this->create_publisher<geometry_msgs::msg::Twist>("/cmd_vel", 10);
@@ -33,6 +35,8 @@ private:
   float left_= 0.0;
   float front_= 0.0;
   float right_ = 0.0;
+  float obstacle;
+  float degrees;
 
   // === Callbacks ===
   void scanCallback(const sensor_msgs::msg::LaserScan::SharedPtr msg) {
@@ -78,12 +82,12 @@ private:
     //             max_direction_);
   }
 
-    void checkvicinity(geometry_msgs::msg::Twist &cmd) {
-        if (min_value_ < 0.50 && min_direction_ < 0) {
+  void checkvicinity(geometry_msgs::msg::Twist &cmd) {
+        if (min_value_ < degrees && min_direction_ < 0) {
             cmd.linear.x = 0.1;
             cmd.angular.z = 0.75;
             RCLCPP_INFO(this->get_logger(), "There is something on right");
-        } else if (min_value_ < 0.50 && min_direction_ > 0) {
+        } else if (min_value_ < degrees && min_direction_ > 0) {
             cmd.linear.x = 0.1;
             cmd.angular.z = -0.75;
             RCLCPP_INFO(this->get_logger(), "There is something on left");
@@ -91,11 +95,17 @@ private:
 
     }
 
+
+  void argument_parsing(char **argv) {
+    obstacle = std::stof(argv[2]);
+    degrees = std::stof(argv[4]);
+    }
+
   void timerCallback() {
     auto cmd = geometry_msgs::msg::Twist();
 
     // === Obstacle Avoidance Logic ===
-    if (front_ > 0.6) {
+    if (front_ > obstacle) {
         cmd.linear.x = 0.2;
         cmd.angular.z = 0.0;
         checkvicinity(cmd);
@@ -115,9 +125,9 @@ private:
   rclcpp::TimerBase::SharedPtr timer_;
 };
 
-int main(int argc, char **argv) {
+int main(int argc, char *argv[]) {
   rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<PreApproach>());
+  rclcpp::spin(std::make_shared<PreApproach>(argc, argv));
   rclcpp::shutdown();
   return 0;
 }
