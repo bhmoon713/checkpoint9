@@ -63,7 +63,7 @@ Visualization Manager:
       Enabled: true
       Invert Rainbow: false
       Max Color: 255; 255; 255
-      Max Intensity: 0
+      Max Intensity: 8000
       Min Color: 0; 0; 0
       Min Intensity: 0
       Name: LaserScan
@@ -116,23 +116,24 @@ Visualization Manager:
       Show Names: false
       Tree:
         odom:
-          robot_base_footprint:
-            robot_base_link:
-              robot_evelator_base_link:
-                {}
-              robot_front_cover_link:
-                robot_base_docking_contact_link:
-                  {}
-              robot_front_laser_base_link:
-                {}
-              robot_omni_backwheel_link:
-                {}
-              robot_omni_front_leftwheel_link:
-                {}
-              robot_omni_front_rightwheel_link:
-                {}
-            robot_top_cover_link:
+          {}
+        robot_base_footprint:
+          robot_base_link:
+            robot_evelator_base_link:
               {}
+            robot_front_cover_link:
+              robot_base_docking_contact_link:
+                {}
+            robot_front_laser_base_link:
+              {}
+            robot_omni_backwheel_link:
+              {}
+            robot_omni_front_leftwheel_link:
+              {}
+            robot_omni_front_rightwheel_link:
+              {}
+          robot_top_cover_link:
+            {}
       Update Interval: 0
       Value: true
   Enabled: true
@@ -180,26 +181,21 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Class: rviz_default_plugins/Orbit
-      Distance: 2.6280250549316406
+      Angle: 0
+      Class: rviz_default_plugins/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
-      Focal Point:
-        X: 0
-        Y: 0
-        Z: 0
-      Focal Shape Fixed Size: true
-      Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.785398006439209
+      Scale: 245.20359802246094
       Target Frame: <Fixed Frame>
-      Value: Orbit (rviz)
-      Yaw: 0.785398006439209
+      Value: TopDownOrtho (rviz_default_plugins)
+      X: 0
+      Y: 0
     Saved: ~
 Window Geometry:
   Displays:

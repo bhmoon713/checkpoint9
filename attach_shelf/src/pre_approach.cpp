@@ -8,10 +8,10 @@ class PreApproach : public rclcpp::Node {
 public:
   PreApproach() : Node("pre_approach") {
     
-// this->declare_parameter<double>("obstacle", 0.5);
-// this->declare_parameter<double>("degrees", 0.0);
+
 this->declare_parameter("obstacle", 0.5);
 this->declare_parameter("degrees", 90.0);
+
 
     getting_params();
     // === Publishers and Subscribers ===
@@ -99,10 +99,7 @@ private:
             this->get_parameter("degrees").get_parameter_value().get<float>();
     }
 
-    // void getting_params() {
-    //     obstacle = this->get_parameter("obstacle").as_double();
-    //     degrees = this->get_parameter("degrees").as_double();
-    // }
+
 
     void gotoDist(geometry_msgs::msg::Twist &cmd) {
         if (front_ < 0.05 || !std::isfinite(front_)) {
