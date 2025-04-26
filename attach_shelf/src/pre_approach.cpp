@@ -40,6 +40,7 @@ private:
   float right_ = 0.0;
   float obstacle;
   float degrees;
+  bool arrived_at_shelf = false;
 
   // === Callbacks ===
   void scanCallback(const sensor_msgs::msg::LaserScan::SharedPtr msg) {
@@ -94,36 +95,39 @@ private:
   }
 
 
-    void checkvicinity(geometry_msgs::msg::Twist &cmd) {
-        if (min_value_ < degrees && min_direction_ < 0) {
-            cmd.linear.x = 0.1;
-            cmd.angular.z = 0.75;
-            RCLCPP_INFO(this->get_logger(), "There is something on right");
-        } else if (min_value_ < degrees && min_direction_ > 0) {
-            cmd.linear.x = 0.1;
-            cmd.angular.z = -0.75;
-            RCLCPP_INFO(this->get_logger(), "There is something on left");
+    void gotoDist(geometry_msgs::msg::Twist &cmd) {
+        float distdiff = front_ - obstacle;
+
+        if (front_ > obstacle) {
+            cmd.linear.x = 0.3 * distdiff / (distdiff + 1) + 0.2;  // Smooth slow down
+            cmd.angular.z = 0.0;
+            RCLCPP_INFO(this->get_logger(), "🚀 Moving forward | Front: %.2f m (Target: %.2f m)", front_, obstacle);
+        } else {
+            // Arrived at shelf!
+            cmd.linear.x = 0.0;
+            cmd.angular.z = 0.0;
+            arrived_at_shelf = true;
+            RCLCPP_INFO(this->get_logger(), "✅ Arrived at target distance. Switching to turning.");
+        }
+    }
+
+    void turnToShelf(geometry_msgs::msg::Twist &cmd) {
+        cmd.linear.x = 0.0;
+        cmd.angular.z = degrees;  // Constant turning rate
+        RCLCPP_INFO(this->get_logger(), "🔄 Turning | Angular Z: %.2f", degrees);
+    }
+
+    void timerCallback() {
+        auto cmd = geometry_msgs::msg::Twist();
+
+        if (!arrived_at_shelf) {
+            gotoDist(cmd);
+        } else {
+            turnToShelf(cmd);
         }
 
+        cmd_pub_->publish(cmd);
     }
-
-  void timerCallback() {
-    auto cmd = geometry_msgs::msg::Twist();
-
-    // === Obstacle Avoidance Logic ===
-    if (front_ > obstacle) {
-        cmd.linear.x = 0.2;
-        cmd.angular.z = 0.0;
-        checkvicinity(cmd);
-        RCLCPP_INFO(this->get_logger(), "I am going forward");
-    } else {
-        cmd.linear.x = 0.2;
-        cmd.angular.z = -max_direction_ / 2;
-        checkvicinity(cmd);
-        RCLCPP_INFO(this->get_logger(), "I am turning to longest distance direction");
-    }
-    cmd_pub_->publish(cmd);
-  }
 
   // === Publishers and Subscribers ===
   rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr cmd_pub_;
