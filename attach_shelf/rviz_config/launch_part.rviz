@@ -7,6 +7,7 @@ Panels:
         - /Global Options1
         - /Status1
         - /LaserScan1
+        - /TF1
       Splitter Ratio: 0.5
     Tree Height: 553
   - Class: rviz_common/Selection
@@ -113,7 +114,7 @@ Visualization Manager:
       Name: TF
       Show Arrows: true
       Show Axes: true
-      Show Names: false
+      Show Names: true
       Tree:
         odom:
           {}
@@ -191,7 +192,7 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 245.20359802246094
+      Scale: 167.09938049316406
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz_default_plugins)
       X: 0

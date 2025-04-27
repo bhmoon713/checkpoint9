@@ -60,11 +60,21 @@ ament_target_dependencies(pre_approach_node
   custom_interfaces
 )
 
+add_executable(laser_to_cart_tf_publisher src/laser_to_cart_tf_publisher.cpp)
+ament_target_dependencies(laser_to_cart_tf_publisher
+  rclcpp
+  sensor_msgs
+  geometry_msgs
+  tf2
+  tf2_ros
+)
+
 install(TARGETS
   pre_approach_node
   patrol_with_service
   direction_service
   test_service
+  laser_to_cart_tf_publisher
   DESTINATION lib/${PROJECT_NAME})
 
 # Install launch files.
@@ -73,5 +83,7 @@ install(DIRECTORY
   rviz_config
   DESTINATION share/${PROJECT_NAME}/
 )
+
+
 
 ament_package()

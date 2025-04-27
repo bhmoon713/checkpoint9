@@ -70,8 +70,8 @@ private:
     RCLCPP_INFO(this->get_logger(), "Group %zu median index: %zu, distance: %.3f meters", g, median_index, median_distance);
     }
 
-    bool two_groups_detected = (groups.size() == 2);
-    RCLCPP_INFO(this->get_logger(), "Two groups detected? %s", two_groups_detected ? "true" : "false");
+    bool two_legs_detected = (groups.size() == 2);
+    RCLCPP_INFO(this->get_logger(), "Two legs detected? %s", two_legs_detected ? "true" : "false");
 
     // Define sector boundaries
     size_t right_start = n * 1 / 4;
