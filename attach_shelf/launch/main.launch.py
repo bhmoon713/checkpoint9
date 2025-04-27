@@ -10,14 +10,19 @@ def generate_launch_description():
     rviz_config_path = os.path.join(
         get_package_share_directory('attach_shelf'),
         'rviz',
-        'cpk9.rviz'
+        'launch_part.rviz'
     )
 
     return LaunchDescription([
         Node(
             package='attach_shelf',
-            executable='pre_approach_node',
-            name='pre_approach'
+            executable='direction_service',
+            name='direction_service'
+        ),
+        Node(
+            package='attach_shelf',
+            executable='patrol_with_service',
+            name='patrol_with_service'
         ),
         Node(
             package='rviz2',

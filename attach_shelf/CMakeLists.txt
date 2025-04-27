@@ -11,12 +11,20 @@ find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(custom_interfaces REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 find_package(rclcpp_action REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
+
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "srv/GetDirection.srv"
+#   "action/GoToPose.action"
+  DEPENDENCIES sensor_msgs geometry_msgs
+)
+
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -30,6 +38,15 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
+add_executable(patrol_with_service src/patrol_with_service.cpp)
+ament_target_dependencies(patrol_with_service rclcpp sensor_msgs geometry_msgs custom_interfaces)
+
+add_executable(direction_service src/direction_service.cpp)
+ament_target_dependencies(direction_service rclcpp sensor_msgs custom_interfaces)
+
+add_executable(test_service src/test_service.cpp)
+ament_target_dependencies(test_service rclcpp sensor_msgs custom_interfaces)
+
 add_executable(pre_approach_node src/pre_approach.cpp)
 ament_target_dependencies(pre_approach_node
   rclcpp
@@ -40,10 +57,14 @@ ament_target_dependencies(pre_approach_node
   tf2
   tf2_ros
   tf2_geometry_msgs
+  custom_interfaces
 )
 
 install(TARGETS
   pre_approach_node
+  patrol_with_service
+  direction_service
+  test_service
   DESTINATION lib/${PROJECT_NAME})
 
 # Install launch files.
@@ -52,6 +73,5 @@ install(DIRECTORY
   rviz_config
   DESTINATION share/${PROJECT_NAME}/
 )
-
 
 ament_package()
