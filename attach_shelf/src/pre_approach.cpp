@@ -140,7 +140,7 @@ private:
         rclcpp::Duration elapsed = this->now() - turn_start_time_;
         if (elapsed.seconds() < turn_duration_sec_) {
             cmd.linear.x = 0.0;
-            cmd.angular.z = - 1.6* ((degrees * M_PI / 180.0) / turn_duration_sec_);  // ✅ Correct parentheses and PI
+            cmd.angular.z =  1.6* ((degrees * M_PI / 180.0) / turn_duration_sec_);  // ✅ Correct parentheses and PI
             // cmd.angular.z = - degrees;
             RCLCPP_INFO(this->get_logger(), "🔄 Turning | Time left: %.2f sec", turn_duration_sec_ - elapsed.seconds());
             RCLCPP_INFO(this->get_logger(), "🔄 Turning | Time elapsed: %.2f sec", elapsed.seconds());

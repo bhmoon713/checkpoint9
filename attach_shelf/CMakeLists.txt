@@ -69,12 +69,17 @@ ament_target_dependencies(laser_to_cart_tf_publisher
   tf2_ros
 )
 
+add_executable(robot_chase src/robot_chase.cpp)
+ament_target_dependencies(robot_chase rclcpp geometry_msgs tf2 tf2_ros tf2_geometry_msgs)
+
+
 install(TARGETS
   pre_approach_node
   patrol_with_service
   direction_service
   test_service
   laser_to_cart_tf_publisher
+  robot_chase
   DESTINATION lib/${PROJECT_NAME})
 
 # Install launch files.

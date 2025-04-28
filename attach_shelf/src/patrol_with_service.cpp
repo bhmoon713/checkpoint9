@@ -69,7 +69,7 @@ private:
     void timerCallback() {
     if (!scan_received_) return;
 
-    auto cmd = geometry_msgs::msg::Twist();
+    // auto cmd = geometry_msgs::msg::Twist();
 
     // Check front distance
     // int scanN = latest_scan_.ranges.size();
