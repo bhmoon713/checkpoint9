@@ -48,30 +48,18 @@ add_executable(test_service src/test_service.cpp)
 ament_target_dependencies(test_service rclcpp sensor_msgs custom_interfaces)
 
 add_executable(pre_approach_node src/pre_approach.cpp)
-ament_target_dependencies(pre_approach_node
-  rclcpp
-  rclcpp_action
-  geometry_msgs
-  sensor_msgs
-  nav_msgs
-  tf2
-  tf2_ros
-  tf2_geometry_msgs
+ament_target_dependencies(pre_approach_node rclcpp rclcpp_action geometry_msgs sensor_msgs nav_msgs tf2 tf2_ros tf2_geometry_msgs
   custom_interfaces
 )
 
 add_executable(laser_to_cart_tf_publisher src/laser_to_cart_tf_publisher.cpp)
-ament_target_dependencies(laser_to_cart_tf_publisher
-  rclcpp
-  sensor_msgs
-  geometry_msgs
-  tf2
-  tf2_ros
-)
+ament_target_dependencies(laser_to_cart_tf_publisher rclcpp sensor_msgs geometry_msgs tf2 tf2_ros)
 
 add_executable(robot_chase src/robot_chase.cpp)
-ament_target_dependencies(robot_chase rclcpp geometry_msgs tf2 tf2_ros tf2_geometry_msgs)
+ament_target_dependencies(robot_chase rclcpp geometry_msgs tf2 tf2_ros tf2_geometry_msgs custom_interfaces)
 
+add_executable(go_to_pose_action src/go_to_pose_action.cpp)
+ament_target_dependencies(go_to_pose_action rclcpp rclcpp_action geometry_msgs nav_msgs tf2 tf2_ros tf2_geometry_msgs custom_interfaces)
 
 install(TARGETS
   pre_approach_node
@@ -80,6 +68,7 @@ install(TARGETS
   test_service
   laser_to_cart_tf_publisher
   robot_chase
+  go_to_pose_action
   DESTINATION lib/${PROJECT_NAME})
 
 # Install launch files.

@@ -44,7 +44,7 @@ private:
     double angular = kp_yaw_ * error_yaw;
 
     // Limit the speeds
-    linear = std::min(0.5, linear);
+    linear = std::min(0.3, linear);
     angular = std::clamp(angular, -0.5, 0.5);
 
     // Stop condition
