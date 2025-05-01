@@ -12,8 +12,8 @@ class PreApproach : public rclcpp::Node {
 public:
   PreApproach() : Node("pre_approach") {
     
-    this->declare_parameter("obstacle", 0.5);
-    this->declare_parameter("degrees", 90.0);
+    this->declare_parameter<double>("obstacle", 0.5);
+    this->declare_parameter<int>("degrees", 90);
     getting_params();
 
     // === Publishers and Subscribers ===
@@ -32,7 +32,7 @@ private:
   // === Member Variables ===
   float front_= 0.0;
   float obstacle;
-  float degrees;
+  int degrees;
   bool arrived_at_shelf = false;
   bool turning_completed = false;
   bool turning_ = false;
@@ -43,14 +43,13 @@ private:
     int scanN = msg->ranges.size();
     front_ = msg->ranges[scanN * 3 / 6];
     }
-  void getting_params() {
-        obstacle =
-            this->get_parameter("obstacle").get_parameter_value().get<float>();
-        degrees =
-            this->get_parameter("degrees").get_parameter_value().get<float>();
+
+    void getting_params() {
+        obstacle = this->get_parameter("obstacle").as_double();  // double
+        degrees  = this->get_parameter("degrees").as_int();   // double
     }
 
-  void gotoDist(geometry_msgs::msg::Twist &cmd) {
+    void gotoDist(geometry_msgs::msg::Twist &cmd) {
         if (front_ < 0.05 || !std::isfinite(front_)) {
             RCLCPP_WARN(this->get_logger(), "⚠️ Laser data invalid (front = %.2f), waiting for good scan...", front_);
             cmd.linear.x = 0.0;

@@ -13,11 +13,11 @@ using namespace std::chrono_literals;
 class PreApproachV2 : public rclcpp::Node {
 public:
   PreApproachV2() : Node("pre_approach_v2") {
-    this->declare_parameter("obstacle", 0.5);
-    this->declare_parameter("degrees", 90.0);
-    this->declare_parameter("final_approach", false);
+    this->declare_parameter<double>("obstacle", 0.3);
+    this->declare_parameter<int>("degrees", 90);
+    this->declare_parameter<bool>("final_approach", false);
 
-    get_params();
+    getting_params();
 
     cmd_pub_ = this->create_publisher<geometry_msgs::msg::Twist>(
       "/diffbot_base_controller/cmd_vel_unstamped", 10);
@@ -38,7 +38,8 @@ public:
 private:
   // === Member Variables ===
   float front_ = 0.0;
-  float obstacle, degrees;
+  float obstacle; 
+  int degrees;
   bool final_approach_;
   bool arrived_at_shelf = false;
   bool turning_completed = false;
@@ -56,11 +57,12 @@ private:
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr elevator_pub_;
 
   // === Get parameters ===
-  void get_params() {
-    obstacle = this->get_parameter("obstacle").as_double();
-    degrees = this->get_parameter("degrees").as_double();
+  void getting_params() {
+    obstacle = this->get_parameter("obstacle").as_double();  // double
+    degrees  = this->get_parameter("degrees").as_int();   // double
     final_approach_ = this->get_parameter("final_approach").as_bool();
-  }
+    }
+
 
   void scanCallback(const sensor_msgs::msg::LaserScan::SharedPtr msg) {
     int scanN = msg->ranges.size();
@@ -131,11 +133,12 @@ private:
           msg.data = "up";
           elevator_pub_->publish(msg);
           RCLCPP_INFO(this->get_logger(), "🛗 Elevator UP message sent.");
+          rclcpp::shutdown();  // Shutdown after service response and elevator message
         } else {
           RCLCPP_WARN(this->get_logger(), "⚠️ Final approach failed. Skipping elevator.");
+          rclcpp::shutdown();  // Shutdown after service response and elevator message
         }
-
-        rclcpp::shutdown();  // Shutdown after service response and elevator message
+       
       });
 
     service_called = true;
@@ -151,7 +154,7 @@ private:
             turnToShelf(cmd);
         } else if (!final_approach_) {
             RCLCPP_INFO(this->get_logger(), "🛑 Final approach is disabled. Skipping service call.");
-            // rclcpp::shutdown();  // Clean exit
+            rclcpp::shutdown();  // Clean exit
             return;
         } else if (!service_called) {
             RCLCPP_INFO(this->get_logger(), "🏁 Turning completed. Calling service...");
