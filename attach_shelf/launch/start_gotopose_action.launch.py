@@ -16,19 +16,14 @@ def generate_launch_description():
     return LaunchDescription([
         Node(
             package='attach_shelf',
-            executable='direction_service',
-            name='direction_service'
+            executable='go_to_pose_action',
+            name='go_to_pose_action'
         ),
-        Node(
-            package='attach_shelf',
-            executable='patrol_with_service',
-            name='patrol_with_service'
-        ),
-        Node(
-            package='rviz2',
-            executable='rviz2',
-            name='rviz2',
-            arguments=['-d', rviz_config_path],
-            output='screen'
-        )
+        # Node(
+        #     package='rviz2',
+        #     executable='rviz2',
+        #     name='rviz2',
+        #     arguments=['-d', rviz_config_path],
+        #     output='screen'
+        # )
     ])
