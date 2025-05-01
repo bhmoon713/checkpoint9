@@ -89,8 +89,8 @@ private:
 
     // === Extra 30cm forward ===
     geometry_msgs::msg::Twist cmd_forward;
-    cmd_forward.linear.x = 0.2;
-    for (int i = 0; i < 10; ++i) {  // ~0.3m at 0.2m/s for 1.5s
+    cmd_forward.linear.x = 0.4;
+    for (int i = 0; i < 20; ++i) {  // ~0.3m at 0.2m/s for 1.5s
       cmd_vel_pub_->publish(cmd_forward);
       rate.sleep();
     }
