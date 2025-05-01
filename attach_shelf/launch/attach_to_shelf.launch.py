@@ -78,7 +78,10 @@ def generate_launch_description():
     cart_frame_chase_node = Node(
         package='attach_shelf',
         executable='robot_chase',
-        name='robot_chase'
+        name='robot_chase',
+                parameters=[
+            {'final_approach': LaunchConfiguration('final_approach')}
+        ]
     )
     
     return LaunchDescription([
