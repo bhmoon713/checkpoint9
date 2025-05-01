@@ -15,7 +15,7 @@ public:
   PreApproachV2() : Node("pre_approach_v2") {
     this->declare_parameter("obstacle", 0.5);
     this->declare_parameter("degrees", 90.0);
-    this->declare_parameter("final_approach", true);
+    this->declare_parameter("final_approach", false);
 
     get_params();
 
@@ -142,20 +142,24 @@ private:
     RCLCPP_INFO(this->get_logger(), "📡 Called /approach_shelf service");
   }
 
-  void timerCallback() {
-    auto cmd = geometry_msgs::msg::Twist();
+    void timerCallback() {
+        auto cmd = geometry_msgs::msg::Twist();
 
-    if (!arrived_at_shelf) {
-      gotoDist(cmd);
-    } else if (!turning_completed) {
-      turnToShelf(cmd);
-    } else if (!service_called) {
-      RCLCPP_INFO(this->get_logger(), "🏁 Turning completed. Calling service...");
-      callApproachShelfService();
+        if (!arrived_at_shelf) {
+            gotoDist(cmd);
+        } else if (!turning_completed) {
+            turnToShelf(cmd);
+        } else if (!final_approach_) {
+            RCLCPP_INFO(this->get_logger(), "🛑 Final approach is disabled. Skipping service call.");
+            // rclcpp::shutdown();  // Clean exit
+            return;
+        } else if (!service_called) {
+            RCLCPP_INFO(this->get_logger(), "🏁 Turning completed. Calling service...");
+            callApproachShelfService();
+        }
+
+        cmd_pub_->publish(cmd);
     }
-
-    cmd_pub_->publish(cmd);
-  }
 
 };
 

@@ -61,7 +61,8 @@ def generate_launch_description():
         name='pre_approach_v2',
         parameters=[
             {'obstacle': LaunchConfiguration('obstacle')},
-            {'degrees': LaunchConfiguration('degrees')}
+            {'degrees': LaunchConfiguration('degrees')},
+            {'final_approach': LaunchConfiguration('final_approach')}
         ]
     )
 
