@@ -55,10 +55,10 @@ def generate_launch_description():
             'rviz_config_file_name': rviz_config_file_name_f}.items()
     )
 
-    pre_approach_node = Node(
+    pre_approach_v2_node = Node(
         package='attach_shelf',
-        executable='pre_approach_node',
-        name='pre_approach',
+        executable='pre_approach_v2_node',
+        name='pre_approach_v2',
         parameters=[
             {'obstacle': LaunchConfiguration('obstacle')},
             {'degrees': LaunchConfiguration('degrees')}
@@ -69,17 +69,13 @@ def generate_launch_description():
         package='attach_shelf',
         executable='laser_to_cart_tf_publisher',
         name='laser_to_cart_tf_publisher',
-        # parameters=[
-        #     {'obstacle': LaunchConfiguration('obstacle')},
-        #     {'degrees': LaunchConfiguration('degrees')}
-        # ]
     )
     
-    # cart_frame_chase_server_node = Node(
-    #     package='attach_shelf',
-    #     executable='robot_chase',
-    #     name='robot_chase_from_launch'
-    # )
+    approach_service_server = Node(
+        package='attach_shelf',
+        executable='approach_service_server_node',
+        name='approach_service_server_node'
+    )
     
 
     # go_to_loading_client_node = Node(
@@ -97,8 +93,7 @@ def generate_launch_description():
         rviz_config_file_name_arg,
         final_approach_arg,
         start_rviz_launch,
-        pre_approach_node,
-        tf_node,
-        # cart_frame_chase_server_node,
-        # go_to_loading_client_node
+        pre_approach_v2_node,
+        approach_service_server,
+        tf_node
     ])

@@ -96,7 +96,7 @@ private:
 
       tf_broadcaster_->sendTransform(transform);
 
-      RCLCPP_INFO(this->get_logger(), "Published cart_frame at (x=%.2f, y=%.2f)", middle_x, middle_y);
+    //   RCLCPP_INFO(this->get_logger(), "Published cart_frame at (x=%.2f, y=%.2f)", middle_x, middle_y);
     }
     else {
       RCLCPP_WARN(this->get_logger(), "Not exactly two groups detected, skipping cart_frame publishing.");
