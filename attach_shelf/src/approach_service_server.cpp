@@ -1,122 +1,91 @@
 #include "rclcpp/rclcpp.hpp"
-#include "sensor_msgs/msg/laser_scan.hpp"
-#include "custom_interfaces/srv/get_direction.hpp"
-#include <cmath>  // for std::isfinite
+#include "geometry_msgs/msg/twist.hpp"
+#include "tf2_ros/transform_listener.h"
+#include "tf2_ros/buffer.h"
+#include "geometry_msgs/msg/transform_stamped.hpp"
+#include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
+#include <cmath>
 
-using std::placeholders::_1;
-using std::placeholders::_2;
-
-class DirectionService : public rclcpp::Node
+using namespace std::chrono_literals;
+class RobotChase : public rclcpp::Node
 {
 public:
-  DirectionService() : Node("direction_service_node")
+  RobotChase() : Node("robot_chase"), tf_buffer_(this->get_clock()), tf_listener_(tf_buffer_)
   {
-    service_ = this->create_service<custom_interfaces::srv::GetDirection>(
-      "/direction_service",
-      std::bind(&DirectionService::handle_service, this, _1, _2));
+    cmd_vel_pub_ = this->create_publisher<geometry_msgs::msg::Twist>("/diffbot_base_controller/cmd_vel_unstamped", 10);
+    timer_ = this->create_wall_timer(
+      100ms, std::bind(&RobotChase::chase_callback, this));
 
-    RCLCPP_INFO(this->get_logger(), "Direction Service Server Ready");
+    kp_yaw_ = 0.1;
+    kp_distance_ = 0.5;
+    arrived_cart_frame_ = false;  // Initialize as false
   }
 
 private:
-  rclcpp::Service<custom_interfaces::srv::GetDirection>::SharedPtr service_;
-
-  void handle_service(
-    const std::shared_ptr<custom_interfaces::srv::GetDirection::Request> request,
-    std::shared_ptr<custom_interfaces::srv::GetDirection::Response> response)
+  void chase_callback()
   {
-    RCLCPP_INFO(this->get_logger(), "Service Requested");
-
-    const auto &ranges = request->laser_data.ranges;
-    size_t n = ranges.size();
-    // if (n < 3) {
-    //   RCLCPP_WARN(this->get_logger(), "Not enough scan data");
-    //   response->direction = "forward";
-    //   return;
-    // }
-
-
-    // Define sector boundaries
-    size_t right_start = n * 1 / 4;
-    size_t right_end   = n * 5 / 12;
-    size_t front_start = n * 5 / 12;
-    size_t front_end   = n * 7 / 12;
-    size_t left_start  = n * 7 / 12;
-    size_t left_end    = n * 3 / 4;
-
-    // Accumulate distances..&& i < n
-    // double total_dist_sec_right = 0.0;
-    // for (size_t i = right_start; i < right_end ; ++i)
-    //   total_dist_sec_right += ranges[i];
-
-    double total_dist_sec_right = 0.0;
-    for (size_t i = right_start; i < right_end; ++i) {
-    if (std::isfinite(ranges[i])) {  // excludes both inf and NaN
-        total_dist_sec_right += ranges[i];
-        }
+    geometry_msgs::msg::TransformStamped transform;
+    try
+    {
+      transform = tf_buffer_.lookupTransform("cart_frame", "robot_front_laser_base_link", tf2::TimePointZero);
+    }
+    catch (const tf2::TransformException &ex)
+    {
+      RCLCPP_WARN(this->get_logger(), "Could not get transform: %s", ex.what());
+      return;
     }
 
-    // double total_dist_sec_front = 0.0;
-    // for (size_t i = front_start; i < front_end ; ++i)
-    //   total_dist_sec_front += ranges[i];
+    double dx = transform.transform.translation.x;
+    double dy = transform.transform.translation.y;
+    double error_distance = std::sqrt(dx * dx + dy * dy);
+    double error_yaw = std::atan2(dy, dx);
 
-    double total_dist_sec_front = 0.0;
-    for (size_t i = front_start; i < front_end; ++i) {
-    if (std::isfinite(ranges[i])) {
-        total_dist_sec_front += ranges[i];
-        }
+    double linear = kp_distance_ * error_distance;
+    double angular = kp_yaw_ * error_yaw;
+
+    // Limit the speeds
+    linear = std::min(0.3, linear);
+    angular = std::clamp(angular, -0.5, 0.5);
+
+    // Stop condition
+    // Stop condition
+    if (error_distance < 0.05)  // Safe distance threshold
+    {
+      linear = 0.0;
+      angular = 0.0;
+      arrived_cart_frame_ = true;  // ✅ Mark as arrived when stopped
+      RCLCPP_WARN(this->get_logger(), "Arrived at cart_frame");
     }
-
-    // double total_dist_sec_left = 0.0;
-    // for (size_t i = left_start; i < left_end ; ++i)
-    //   total_dist_sec_left += ranges[i];
-
-
-    double total_dist_sec_left = 0.0;
-    for (size_t i = left_start; i < left_end; ++i) {
-    if (std::isfinite(ranges[i])) {
-        total_dist_sec_left += ranges[i];
-        }
+    else
+    {
+      arrived_cart_frame_ = false; // ✅ Otherwise keep it false
     }
+    geometry_msgs::msg::Twist cmd;
+    cmd.linear.x = linear;
+    cmd.angular.z = angular;
 
-    float front_distance = ranges[n / 2];  // Center ray for obstacle detection
-
-    auto min_it = std::min_element(ranges.begin() + 220, ranges.begin() + 440);
-    float min_front = (min_it != ranges.end()) ? *min_it : std::numeric_limits<float>::infinity();
-
-
-    RCLCPP_INFO(this->get_logger(),
-      "front_dist: %.2f | Total (R: %.2f, F: %.2f, L: %.2f)",
-      front_distance, total_dist_sec_right, total_dist_sec_front, total_dist_sec_left);
-
-    // Decision logic
-    if (front_distance < 0.35 || min_front < 0.3) {
-    // if (total_dist_sec_front < 0.35 *110  || ranges[165] <0.3 || ranges[495] <0.3) {
-    // Obstacle detected — evaluate sectors
-    RCLCPP_INFO(this->get_logger(),
-                "Obstacle detected | front_distance: %.2f | min_front: %.2f",
-                front_distance, min_front);
-        if (total_dist_sec_front >= total_dist_sec_left && total_dist_sec_front >= total_dist_sec_right) {
-            response->direction = "forward";
-        } else if (total_dist_sec_left >= total_dist_sec_front && total_dist_sec_left >= total_dist_sec_right) {
-            response->direction = "left";
-        } else {
-            response->direction = "right";
-        }
-
-    RCLCPP_INFO(this->get_logger(), "Chosen direction: %s", response->direction.c_str());
-    } else {
-    response->direction = "forward";
-    RCLCPP_INFO(this->get_logger(), "Path is clear — go forward");
+    cmd_vel_pub_->publish(cmd); 
+    if (arrived_cart_frame_)
+    {
+    RCLCPP_INFO(this->get_logger(), "Arrived at cart_frame. Shutting down node...");
+    rclcpp::shutdown();
     }
-    RCLCPP_INFO(this->get_logger(), "Service Completed");
   }
-};
 
+  rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_pub_;
+  rclcpp::TimerBase::SharedPtr timer_;
+  tf2_ros::Buffer tf_buffer_;
+  tf2_ros::TransformListener tf_listener_;
+
+  double kp_yaw_;
+  double kp_distance_;
+  bool arrived_cart_frame_;  // ✅ Added here
+};
+ 
 int main(int argc, char **argv)
 {
   rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<DirectionService>());
+  rclcpp::spin(std::make_shared<RobotChase>());
   rclcpp::shutdown();
   return 0;
 }

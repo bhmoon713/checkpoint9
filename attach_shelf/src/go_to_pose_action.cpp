@@ -95,7 +95,7 @@ double normalize_angle(double angle)
 
     rclcpp::Rate rate(10); // 10 Hz
 
-    const double distance_thresh = 0.03; // meters
+    const double distance_thresh = 0.003; // meters
     const double angle_thresh = 0.03;   // radians (~3 degrees)
 
     while (rclcpp::ok()) {

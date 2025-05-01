@@ -1,2 +1,82 @@
-# The service server: approach_service_server.cpp.
-# The node: pre_approach_v2.cpp.
+from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument
+from launch.actions import IncludeLaunchDescription
+
+from launch.actions import GroupAction
+
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+
+from launch.substitutions import LaunchConfiguration
+from launch.substitutions import PathJoinSubstitution
+from launch_ros.substitutions import FindPackageShare
+from launch.substitutions import TextSubstitution
+
+
+from launch_ros.actions import PushRosNamespace
+
+
+def generate_launch_description():
+
+    package_description = "attach_shelf"
+
+    # args that can be set from the command line or a default will be used
+    # TextSubstitution(text="0.0") W ill only evaluate that in execution time.
+
+    obstacle_arg = DeclareLaunchArgument(
+        "obstacle", default_value=TextSubstitution(text="0.3")
+    )
+    degrees_arg = DeclareLaunchArgument(
+        "degrees", default_value="90.0"
+    )
+    rviz_config_file_name_arg = DeclareLaunchArgument(
+        "rviz_config_file_name", default_value=TextSubstitution(text="launch_part.rviz")
+    )
+    final_approach_arg = DeclareLaunchArgument(
+        "final_approach", default_value=TextSubstitution(text="false")
+    )
+
+    obstacle_f = LaunchConfiguration('obstacle')
+    degrees_f = LaunchConfiguration('degrees')
+
+    rviz_config_file_name_f = LaunchConfiguration('rviz_config_file_name')
+    final_approach_f = LaunchConfiguration('final_approach')
+
+    # include another launch file
+    # use items because you need to pass a list with a key-value structure
+    # [(key1,value_x),(key2,value_y),...]
+
+    start_rviz_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([
+            PathJoinSubstitution([
+                FindPackageShare(package_description),
+                'launch',
+                'start_rviz_with_arguments.launch.py'
+            ])
+        ]),
+        launch_arguments={
+            'rviz_config_file_name': rviz_config_file_name_f}.items()
+    )
+
+    # include another launch file in the chatter_ns namespace
+    
+    pre_approach_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([
+            PathJoinSubstitution([
+                FindPackageShare(package_description),
+                'launch',
+                'pre_approach.launch.py'
+            ])
+        ]),
+        launch_arguments={'obstacle': obstacle_f,
+                          'degrees': degrees_f,
+                          'final_approach': final_approach_f,}.items()
+    )
+    
+    return LaunchDescription([
+        obstacle_arg,
+        degrees_arg,
+        rviz_config_file_name_arg,
+        final_approach_arg,
+        start_rviz_launch,
+        pre_approach_launch,
+    ])
