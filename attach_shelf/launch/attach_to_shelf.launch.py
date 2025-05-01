@@ -65,6 +65,21 @@ def generate_launch_description():
         ]
     )
 
+    tf_node = Node(
+        package='attach_shelf',
+        executable='laser_to_cart_tf_publisher',
+        name='laser_to_cart_tf_publisher',
+        # parameters=[
+        #     {'obstacle': LaunchConfiguration('obstacle')},
+        #     {'degrees': LaunchConfiguration('degrees')}
+        # ]
+    )
+    
+    cart_frame_chase_node = Node(
+        package='attach_shelf',
+        executable='robot_chase',
+        name='robot_chase'
+    )
     
     return LaunchDescription([
         obstacle_arg,
@@ -73,4 +88,6 @@ def generate_launch_description():
         final_approach_arg,
         start_rviz_launch,
         pre_approach_node,
+        tf_node,
+        cart_frame_chase_node
     ])
