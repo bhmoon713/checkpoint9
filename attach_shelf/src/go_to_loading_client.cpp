@@ -8,7 +8,7 @@ class GoToLoadingClient : public rclcpp::Node
 public:
   GoToLoadingClient() : Node("go_to_loading_client")
   {
-    this->declare_parameter("final_approach", false);
+    this->declare_parameter("final_approach", true);
     bool final_approach = this->get_parameter("final_approach").as_bool();
 
     if (!final_approach) {
@@ -18,11 +18,11 @@ public:
 
     RCLCPP_INFO(this->get_logger(), "✅ final_approach is true — calling service...");
 
-    client_ = this->create_client<custom_interfaces::srv::GoToLoading>("/go_to_loading");
+    client_ = this->create_client<custom_interfaces::srv::GoToLoading>("/approach_shelf");
 
     // Wait for the service to be available
     while (!client_->wait_for_service(1s) && rclcpp::ok()) {
-      RCLCPP_INFO(this->get_logger(), "Waiting for service /go_to_loading...");
+      RCLCPP_INFO(this->get_logger(), "Waiting for service /attach_to_shelf...");
     }
 
     auto request = std::make_shared<custom_interfaces::srv::GoToLoading::Request>();

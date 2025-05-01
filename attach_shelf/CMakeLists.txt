@@ -61,6 +61,9 @@ ament_target_dependencies(robot_chase rclcpp geometry_msgs tf2 tf2_ros tf2_geome
 add_executable(go_to_pose_action src/go_to_pose_action.cpp)
 ament_target_dependencies(go_to_pose_action rclcpp rclcpp_action geometry_msgs nav_msgs tf2 tf2_ros tf2_geometry_msgs custom_interfaces)
 
+add_executable(go_to_loading_client src/go_to_loading_client.cpp)
+ament_target_dependencies(go_to_loading_client rclcpp custom_interfaces)
+
 install(TARGETS
   pre_approach_node
   patrol_with_service
@@ -69,6 +72,7 @@ install(TARGETS
   laser_to_cart_tf_publisher
   robot_chase
   go_to_pose_action
+  go_to_loading_client
   DESTINATION lib/${PROJECT_NAME})
 
 # Install launch files.
@@ -77,7 +81,5 @@ install(DIRECTORY
   rviz_config
   DESTINATION share/${PROJECT_NAME}/
 )
-
-
 
 ament_package()

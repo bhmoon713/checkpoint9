@@ -95,8 +95,8 @@ double normalize_angle(double angle)
 
     rclcpp::Rate rate(10); // 10 Hz
 
-    const double distance_thresh = 0.003; // meters
-    const double angle_thresh = 0.03;   // radians (~3 degrees)
+    const double distance_thresh = 0.03; // meters
+    const double angle_thresh = 0.1;   // radians (~3 degrees)
 
     while (rclcpp::ok()) {
         if (goal_handle->is_canceling()) {
@@ -130,7 +130,7 @@ double normalize_angle(double angle)
         if (distance > distance_thresh) {
         // Phase 1: turn to face the target first
         if (std::abs(angle_to_target) > angle_thresh) {
-            cmd.angular.z = 0.5 * angle_to_target;
+            cmd.angular.z = 0.3 * angle_to_target+0.2;
             cmd.linear.x = 0.0; // do not move just rotate
         } else {
             // Phase 2: drive forward toward the target

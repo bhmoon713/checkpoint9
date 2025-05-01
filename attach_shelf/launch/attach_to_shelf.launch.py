@@ -30,7 +30,7 @@ def generate_launch_description():
         "rviz_config_file_name", default_value=TextSubstitution(text="launch_part.rviz")
     )
     final_approach_arg = DeclareLaunchArgument(
-        "final_approach", default_value=TextSubstitution(text="false")
+        "final_approach", default_value=TextSubstitution(text="true")
     )
 
     obstacle_f = LaunchConfiguration('obstacle')
@@ -75,15 +75,22 @@ def generate_launch_description():
         # ]
     )
     
-    cart_frame_chase_node = Node(
-        package='attach_shelf',
-        executable='robot_chase',
-        name='robot_chase',
-                parameters=[
-            {'final_approach': LaunchConfiguration('final_approach')}
-        ]
-    )
+    # cart_frame_chase_server_node = Node(
+    #     package='attach_shelf',
+    #     executable='robot_chase',
+    #     name='robot_chase_from_launch'
+    # )
     
+
+    # go_to_loading_client_node = Node(
+    #     package='attach_shelf',
+    #     executable='go_to_loading_client',
+    #     name='go_to_loading_client',
+    #     parameters=[
+    #         {'final_approach': LaunchConfiguration('final_approach')}
+    #     ]
+    # )
+
     return LaunchDescription([
         obstacle_arg,
         degrees_arg,
@@ -92,5 +99,6 @@ def generate_launch_description():
         start_rviz_launch,
         pre_approach_node,
         tf_node,
-        cart_frame_chase_node
+        # cart_frame_chase_server_node,
+        # go_to_loading_client_node
     ])

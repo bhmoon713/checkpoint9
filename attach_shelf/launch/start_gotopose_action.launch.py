@@ -10,7 +10,7 @@ def generate_launch_description():
     rviz_config_path = os.path.join(
         get_package_share_directory('attach_shelf'),
         'rviz',
-        'patrol.rviz'
+        'launch_part.rviz'
     )
 
     return LaunchDescription([
