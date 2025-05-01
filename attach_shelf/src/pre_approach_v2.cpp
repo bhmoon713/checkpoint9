@@ -2,6 +2,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/laser_scan.hpp"
 #include "custom_interfaces/srv/go_to_loading.hpp"
+#include "std_msgs/msg/string.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -30,7 +31,7 @@ public:
       std::bind(&PreApproachV2::timerCallback, this));
 
     client_ = this->create_client<custom_interfaces::srv::GoToLoading>("/approach_shelf");
-
+    elevator_pub_ = this->create_publisher<std_msgs::msg::String>("/elevator_up", 10); 
     RCLCPP_INFO(this->get_logger(), "✅ PreApproachV2 node started.");
   }
 
@@ -45,12 +46,14 @@ private:
   bool service_called = false;
   rclcpp::Time turn_start_time_;
   double turn_duration_sec_ = 10.0;
-
+  bool elevator_sent_ = false;  // Track if we've sent it
+  
   // === ROS Handles ===
   rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr cmd_pub_;
   rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr scan_sub_;
   rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::Client<custom_interfaces::srv::GoToLoading>::SharedPtr client_;
+  rclcpp::Publisher<std_msgs::msg::String>::SharedPtr elevator_pub_;
 
   // === Get parameters ===
   void get_params() {
@@ -107,9 +110,9 @@ private:
   void callApproachShelfService() {
     if (service_called) return;
 
-    if (!client_->wait_for_service(2s)) {
-      RCLCPP_ERROR(this->get_logger(), "❌ /approach_shelf service not available.");
-      return;
+    while (!client_->wait_for_service(1s)) {
+      RCLCPP_WARN(this->get_logger(), "Waiting for /approach_shelf service...");
+      if (!rclcpp::ok()) return;
     }
 
     auto request = std::make_shared<custom_interfaces::srv::GoToLoading::Request>();
@@ -122,11 +125,17 @@ private:
       [this](ServiceResponseFuture result) {
         auto response = result.get();
         if (response->complete) {
-          RCLCPP_INFO(this->get_logger(), "✅ Final approach succeeded.");
+          RCLCPP_INFO(this->get_logger(), "✅ Final approach succeeded. Sending elevator up...");
+
+          std_msgs::msg::String msg;
+          msg.data = "up";
+          elevator_pub_->publish(msg);
+          RCLCPP_INFO(this->get_logger(), "🛗 Elevator UP message sent.");
         } else {
-          RCLCPP_WARN(this->get_logger(), "⚠️ Final approach failed.");
+          RCLCPP_WARN(this->get_logger(), "⚠️ Final approach failed. Skipping elevator.");
         }
-        rclcpp::shutdown();  // ✅ shutdown AFTER service call completes
+
+        rclcpp::shutdown();  // Shutdown after service response and elevator message
       });
 
     service_called = true;
@@ -147,6 +156,7 @@ private:
 
     cmd_pub_->publish(cmd);
   }
+
 };
 
 int main(int argc, char *argv[]) {

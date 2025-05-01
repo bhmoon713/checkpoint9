@@ -44,7 +44,7 @@ ament_target_dependencies(pre_approach_node rclcpp rclcpp_action geometry_msgs s
 )
 
 add_executable(pre_approach_v2_node src/pre_approach_v2.cpp)
-ament_target_dependencies(pre_approach_v2_node rclcpp rclcpp_action geometry_msgs sensor_msgs nav_msgs tf2 tf2_ros tf2_geometry_msgs
+ament_target_dependencies(pre_approach_v2_node rclcpp rclcpp_action geometry_msgs std_msgs sensor_msgs nav_msgs tf2 tf2_ros tf2_geometry_msgs
   custom_interfaces
 )
 
