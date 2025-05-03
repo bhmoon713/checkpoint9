@@ -13,18 +13,18 @@ using std::placeholders::_1;
 using std::placeholders::_2;
 using namespace std::chrono_literals;
 
-class ApproachServiceServer : public rclcpp::Node
+class AttachServer : public rclcpp::Node
 {
 public:
-  ApproachServiceServer()
-  : Node("approach_server"), tf_buffer_(this->get_clock()), tf_listener_(tf_buffer_)
+  AttachServer()
+  : Node("attach_server"), tf_buffer_(this->get_clock()), tf_listener_(tf_buffer_)
   {
     cmd_vel_pub_ = this->create_publisher<geometry_msgs::msg::Twist>(
       "/diffbot_base_controller/cmd_vel_unstamped", 10);
 
     service_ = this->create_service<custom_interfaces::srv::GoToLoading>(
       "/approach_shelf",
-      std::bind(&ApproachServiceServer::handle_approach_request, this, _1, _2));
+      std::bind(&AttachServer::handle_approach_request, this, _1, _2));
 
     kp_yaw_ = 0.1;
     kp_distance_ = 0.5;
@@ -105,7 +105,7 @@ private:
 int main(int argc, char **argv)
 {
   rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<ApproachServiceServer>());
+  rclcpp::spin(std::make_shared<AttachServer>());
   rclcpp::shutdown();
   return 0;
 }
