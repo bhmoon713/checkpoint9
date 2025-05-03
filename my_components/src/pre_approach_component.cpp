@@ -87,8 +87,7 @@ void PreApproach::timerCallback()
   } else if (!turning_completed) {
     turnToShelf(cmd);
   } else {
-    RCLCPP_INFO(this->get_logger(), "🏁 Turning completed. Shutting down node...");
-    rclcpp::shutdown();
+    RCLCPP_INFO(this->get_logger(), "🏁 Turning completed. Ready for call from c...");
   }
 
   cmd_pub_->publish(cmd);

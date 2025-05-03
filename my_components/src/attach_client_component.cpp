@@ -8,8 +8,7 @@ namespace my_components
 AttachClient::AttachClient(const rclcpp::NodeOptions & options)
 : Node("go_to_loading_client", options)
 {
-  this->declare_parameter("final_approach", true);
-  bool final_approach = this->get_parameter("final_approach").as_bool();
+  bool final_approach = true;
 
   if (!final_approach) {
     RCLCPP_WARN(this->get_logger(), "❌ final_approach is false — skipping service call.");
