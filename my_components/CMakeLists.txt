@@ -23,6 +23,7 @@ find_package(composition REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
+find_package(sensor_msgs REQUIRED)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -53,6 +54,8 @@ target_compile_definitions(pre_approach_component PRIVATE "COMPOSITION_BUILDING_
 ament_target_dependencies(pre_approach_component
   "rclcpp"
   "rclcpp_components"
+  "sensor_msgs"
+  "nav_msgs"
   "geometry_msgs")
 rclcpp_components_register_nodes(pre_approach_component "my_components::PreApproach")
 set(node_plugins "${node_plugins}my_components::PreApproach;$<TARGET_FILE:pre_approach_component>\n")
