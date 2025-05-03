@@ -84,6 +84,23 @@ ament_target_dependencies(attach_server_component
 rclcpp_components_register_nodes(attach_server_component "my_components::AttachServer")
 set(node_plugins "${node_plugins}my_components::AttachServer;$<TARGET_FILE:attach_server_component>\n")
 
+# attach_client_component 
+add_library(attach_client_component SHARED src/attach_client_component.cpp)
+target_compile_definitions(attach_client_component PRIVATE "COMPOSITION_BUILDING_DLL")
+ament_target_dependencies(attach_client_component
+  "rclcpp"
+  "rclcpp_components"
+#   "sensor_msgs"
+#   "nav_msgs"
+#   "geometry_msgs"
+#   "tf2"
+#   "tf2_ros"
+#   "tf2_geometry_msgs"
+  "custom_interfaces")
+
+rclcpp_components_register_nodes(attach_client_component "my_components::AttachClient")
+set(node_plugins "${node_plugins}my_components::AttachClient;$<TARGET_FILE:attach_client_component>\n")
+
 
 add_library(readodom_component SHARED src/readodom_component.cpp)
 target_compile_definitions(readodom_component PRIVATE "COMPOSITION_BUILDING_DLL")
@@ -109,23 +126,13 @@ ament_target_dependencies(server_component
 rclcpp_components_register_nodes(server_component "my_components::Server")
 set(node_plugins "${node_plugins}my_components::Server;$<TARGET_FILE:server_component>\n")
 
-add_library(client_component SHARED src/client_component.cpp)
-target_compile_definitions(client_component PRIVATE "COMPOSITION_BUILDING_DLL")
-ament_target_dependencies(client_component
-  "std_srvs"
-  "rclcpp"
-  "rclcpp_components")
-rclcpp_components_register_nodes(client_component "my_components::Client")
-set(node_plugins "${node_plugins}my_components::Client;$<TARGET_FILE:client_component>\n")
-
-
 install(TARGETS
   manual_composition
   server_component
-  client_component
   pre_approach_component 
   attach_server_component
   readodom_component
+  attach_client_component
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin)
