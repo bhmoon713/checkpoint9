@@ -10,12 +10,17 @@ namespace my_components
 class AttachClient : public rclcpp::Node
 {
 public:
-  explicit AttachClient(const rclcpp::NodeOptions & options);
+  explicit AttachClient(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
 
 private:
+  void call_service();
+  void check_response();
+
+  rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::Client<custom_interfaces::srv::GoToLoading>::SharedPtr client_;
+  rclcpp::Client<custom_interfaces::srv::GoToLoading>::SharedFuture future_;
 };
 
-}  // namespace attach_shelf
+}  // namespace my_components
 
 #endif  // ATTACH_CLIENT_COMPONENT_HPP_

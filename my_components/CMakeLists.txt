@@ -90,6 +90,7 @@ target_compile_definitions(attach_client_component PRIVATE "COMPOSITION_BUILDING
 ament_target_dependencies(attach_client_component
   "rclcpp"
   "rclcpp_components"
+  "std_srvs"
 #   "sensor_msgs"
 #   "nav_msgs"
 #   "geometry_msgs"

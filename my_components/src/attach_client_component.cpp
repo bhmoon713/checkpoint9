@@ -8,34 +8,36 @@ namespace my_components
 AttachClient::AttachClient(const rclcpp::NodeOptions & options)
 : Node("go_to_loading_client", options)
 {
-  bool final_approach = true;
-
-  if (!final_approach) {
-    RCLCPP_WARN(this->get_logger(), "❌ final_approach is false — skipping service call.");
-    return;
-  }
-
-  RCLCPP_INFO(this->get_logger(), "✅ final_approach is true — calling service...");
-
   client_ = this->create_client<custom_interfaces::srv::GoToLoading>("/approach_shelf");
 
-  while (!client_->wait_for_service(1s) && rclcpp::ok()) {
-    RCLCPP_INFO(this->get_logger(), "Waiting for service /approach_shelf...");
+  timer_ = this->create_wall_timer(100ms, std::bind(&AttachClient::call_service, this));
+}
+
+void AttachClient::call_service()
+{
+  if (!client_->wait_for_service(1s)) {
+    RCLCPP_WARN(this->get_logger(), "Service /approach_shelf not available.");
+    return;
   }
 
   auto request = std::make_shared<custom_interfaces::srv::GoToLoading::Request>();
   request->attach_to_shelf = true;
 
-  auto future = client_->async_send_request(request);
-  if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), future) ==
-      rclcpp::FutureReturnCode::SUCCESS)
+  future_ = client_->async_send_request(request);
+
+  // Switch to response-check timer
+  timer_->cancel();
+  timer_ = this->create_wall_timer(100ms, std::bind(&AttachClient::check_response, this));
+}
+
+void AttachClient::check_response()
+{
+  if (future_.valid() &&
+      future_.wait_for(0s) == std::future_status::ready)
   {
-    auto response = future.get();
+    auto response = future_.get();
     RCLCPP_INFO(this->get_logger(), "Service response: complete = %s", response->complete ? "true" : "false");
-  }
-  else
-  {
-    RCLCPP_ERROR(this->get_logger(), "Failed to call service /go_to_loading");
+    timer_->cancel();  // Done
   }
 }
 
