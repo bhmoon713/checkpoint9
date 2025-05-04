@@ -53,7 +53,7 @@ void AttachServer::handle_approach_request(
     double error_distance = std::sqrt(dx * dx + dy * dy);
     double error_yaw = std::atan2(dy, dx);
 
-    double linear = std::min(0.3, kp_distance_ * error_distance);
+    double linear = std::min(0.3, kp_distance_ * error_distance + 0.15);
     double angular = std::clamp(kp_yaw_ * error_yaw, -0.5, 0.5);
 
     geometry_msgs::msg::Twist cmd;
