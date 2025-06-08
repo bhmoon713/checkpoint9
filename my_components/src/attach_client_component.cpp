@@ -38,6 +38,7 @@ void AttachClient::check_response()
     auto response = future_.get();
     RCLCPP_INFO(this->get_logger(), "Service response: complete = %s", response->complete ? "true" : "false");
     timer_->cancel();  // Done
+    rclcpp::shutdown();
   }
 }
 

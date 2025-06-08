@@ -33,7 +33,8 @@ private:
   tf2_ros::Buffer tf_buffer_;
   tf2_ros::TransformListener tf_listener_;
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr elevator_pub_;
-
+  rclcpp::TimerBase::SharedPtr shutdown_timer_;
+  
   double kp_yaw_, kp_distance_;
 };
 

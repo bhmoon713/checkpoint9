@@ -89,6 +89,7 @@ void PreApproach::timerCallback()
   } else {
     RCLCPP_INFO(this->get_logger(), "🏁 Turning completed. Ready for call from c...");
     timer_->cancel();  // ✅ Stop the timer so it won't run again
+    // rclcpp::shutdown();
   }
 
   cmd_pub_->publish(cmd);

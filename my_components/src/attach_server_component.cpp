@@ -1,4 +1,5 @@
 #include "my_components/attach_server_component.hpp"
+#include "std_msgs/msg/string.hpp"
 
 #include <algorithm>
 
@@ -18,6 +19,7 @@ AttachServer::AttachServer(const rclcpp::NodeOptions & options)
   service_ = this->create_service<custom_interfaces::srv::GoToLoading>(
     "/approach_shelf",
     std::bind(&AttachServer::handle_approach_request, this, _1, _2));
+  elevator_pub_ = this->create_publisher<std_msgs::msg::String>("/elevator_up", 10);
 
   kp_yaw_ = 0.1;
   kp_distance_ = 0.5;
@@ -35,7 +37,7 @@ void AttachServer::handle_approach_request(
     return;
   }
 
-  RCLCPP_INFO(this->get_logger(), "🛻 Final approach: moving toward cart_frame");
+  RCLCPP_INFO(this->get_logger(), "Final approach: moving toward cart_frame");
 
   rclcpp::Rate rate(10);
   while (rclcpp::ok()) {
@@ -61,7 +63,7 @@ void AttachServer::handle_approach_request(
       cmd.linear.x = 0.0;
       cmd.angular.z = 0.0;
       cmd_vel_pub_->publish(cmd);
-      RCLCPP_INFO(this->get_logger(), "✅ Arrived at cart_frame. Stopping.");
+      RCLCPP_INFO(this->get_logger(), "Arrived at cart_frame. Stopping.");
       break;
     }
 
@@ -80,8 +82,22 @@ void AttachServer::handle_approach_request(
   cmd_forward.linear.x = 0.0;
   cmd_vel_pub_->publish(cmd_forward);
 
-  RCLCPP_INFO(this->get_logger(), "✅ Shelf loaded successfully.");
+  RCLCPP_INFO(this->get_logger(), "Shelf loaded successfully.");
+
+  // 🆙 Publish elevator up command
+
+  std_msgs::msg::String lift_msg;
+  lift_msg.data = "up";
+  elevator_pub_->publish(lift_msg);
+  RCLCPP_INFO(this->get_logger(), "Shelf lifted via /elevator_up");
   response->complete = true;
+
+    // Schedule shutdown 1 second later to avoid crash in component container
+    shutdown_timer_ = this->create_wall_timer(
+    1s, [this]() {
+        RCLCPP_INFO(this->get_logger(), "Shutting down node safely...");
+        rclcpp::shutdown();
+    });
 }
 
 }  // namespace my_components

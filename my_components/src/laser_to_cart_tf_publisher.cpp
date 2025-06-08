@@ -39,7 +39,7 @@ private:
     }
 
     if (high_intensity_indices.empty()) {
-      RCLCPP_WARN(this->get_logger(), "No high intensity points found.");
+    //   RCLCPP_WARN(this->get_logger(), "No high intensity points found.");
       return;
     }
 
