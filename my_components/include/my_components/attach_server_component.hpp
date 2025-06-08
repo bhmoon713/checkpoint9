@@ -8,6 +8,8 @@
 #include "geometry_msgs/msg/transform_stamped.hpp"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
 #include "custom_interfaces/srv/go_to_loading.hpp"
+#include "std_msgs/msg/string.hpp"
+
 
 #include <memory>
 #include <cmath>
@@ -30,6 +32,7 @@ private:
   rclcpp::Service<custom_interfaces::srv::GoToLoading>::SharedPtr service_;
   tf2_ros::Buffer tf_buffer_;
   tf2_ros::TransformListener tf_listener_;
+  rclcpp::Publisher<std_msgs::msg::String>::SharedPtr elevator_pub_;
 
   double kp_yaw_, kp_distance_;
 };
